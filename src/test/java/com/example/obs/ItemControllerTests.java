@@ -16,17 +16,18 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-@WebMvcTest(ItemController.class)
+@WebMvcTest
 public class ItemControllerTests {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @Mock
+    @MockBean
     private ItemService service;
 
     @InjectMocks
@@ -41,15 +42,19 @@ public class ItemControllerTests {
     @Test
     void testSaveSuccess() throws Exception {
         Item itemRequest = new Item(); // Set appropriate fields if needed
+        itemRequest.setName("pen");
+        itemRequest.setPrice(50);
         Item savedItem = new Item(); // Set appropriate fields if needed
+        savedItem.setName("pen");
+        savedItem.setPrice(50);
         savedItem.setId(1L); // Example field
 
         when(service.save(itemRequest)).thenReturn(savedItem);
 
-        mockMvc.perform(post("/add")
+        mockMvc.perform(post("/item/add")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(itemRequest)))
                 .andExpect(status().isOk())
-                .andExpect(content().json("{\"message\":\"Add data success\",\"status\":200,\"data\":{\"id\":1}}"));
+                .andExpect(content().json("{\"message\":\"Add data success\",\"status\":200,\"data\":{\"id\":1,\"name\":\"pen\",\"price\":50}}"));
     }
 }
