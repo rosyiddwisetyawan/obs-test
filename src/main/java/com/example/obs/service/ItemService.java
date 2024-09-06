@@ -1,5 +1,6 @@
 package com.example.obs.service;
 
+import com.example.obs.exception.ResourceNotFoundException;
 import com.example.obs.model.GetRequest;
 import com.example.obs.model.Item;
 import com.example.obs.repository.ItemRepository;
@@ -13,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Transactional
@@ -23,6 +23,11 @@ public class ItemService {
     private ItemRepository repository;
 
     public Item save(Item request){
+
+        Item item = repository.findByName(request.getName());
+        if(item!=null){
+            throw new IllegalArgumentException("Item already exist");
+        }
         return repository.save(request);
     }
 
@@ -32,7 +37,7 @@ public class ItemService {
             repository.deleteById(Long.parseLong(id));
             return true;
         }
-        return null;
+        throw new ResourceNotFoundException("Item not found id: "+id);
     }
 
     public Item update(Item request){
@@ -40,16 +45,12 @@ public class ItemService {
         if(status) {
             return repository.save(request);
         }
-        return null;
+        throw new ResourceNotFoundException("Item not found id: "+request.getId());
     }
 
     public Item getById(String id){
-        Optional<Item> item = repository.findById(Long.parseLong(id));
-        if(item.isPresent()) {
-            Item it = item.get();
-            return it;
-        }
-        return null;
+        return repository.findById(Long.parseLong(id))
+                .orElseThrow(() -> new ResourceNotFoundException("item not found for id: " + id));
     }
 
     public List<Item> getAll(GetRequest request) {

@@ -1,11 +1,9 @@
 package com.example.obs.service;
 
+import com.example.obs.exception.ResourceNotFoundException;
 import com.example.obs.model.GetRequest;
 import com.example.obs.model.Inventory;
-import com.example.obs.model.Item;
 import com.example.obs.model.Order;
-import com.example.obs.repository.InventoryRepository;
-import com.example.obs.repository.ItemRepository;
 import com.example.obs.repository.OrderRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +27,7 @@ public class OrderService {
     private InventoryService inventoryService;
 
     public Order save(Order request){
-        Inventory data = inventoryService.save(new Inventory(null,request.getItemId(), request.getQty(),"W|order"));
+        Inventory data = inventoryService.save(new Inventory(null,request.getItemId(), request.getQty(),"T|order"));
         if(data!=null){
             return orderRepository.save(request);
         }
@@ -42,7 +40,7 @@ public class OrderService {
             orderRepository.deleteById(Long.parseLong(id));
             return true;
         }
-        return null;
+        throw new ResourceNotFoundException("Order not found id: "+id);
     }
 
     public Order update(Order request){
@@ -50,16 +48,13 @@ public class OrderService {
         if(status) {
             return orderRepository.save(request);
         }
-        return null;
+        throw new ResourceNotFoundException("Order not found id: "+request.getId());
     }
 
     public Order getById(String id){
-        Optional<Order> optionalOrder = orderRepository.findById(Long.parseLong(id));
-        if(optionalOrder.isPresent()) {
-            Order order = optionalOrder.get();
-            return order;
-        }
-        return null;
+
+        return orderRepository.findById(Long.parseLong(id))
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found for id: " + id));
     }
 
     public List<Order> getAll(GetRequest request) {
