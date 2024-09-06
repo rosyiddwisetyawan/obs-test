@@ -33,15 +33,10 @@ public class OrderControllerTests {
     @MockBean
     private OrderService service;
 
-    @InjectMocks
-    private OrderController orderController;
-
     private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-        mockMvc = MockMvcBuilders.standaloneSetup(orderController).build();
         objectMapper = new ObjectMapper();
     }
 

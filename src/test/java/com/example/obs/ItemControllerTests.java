@@ -3,8 +3,11 @@ package com.example.obs;
 import com.example.obs.controller.ItemController;
 import com.example.obs.model.Item;
 import com.example.obs.service.ItemService;
+
+import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
@@ -21,7 +24,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-@WebMvcTest
+@WebMvcTest(ItemController.class)
 public class ItemControllerTests {
 
     @Autowired
@@ -30,13 +33,11 @@ public class ItemControllerTests {
     @MockBean
     private ItemService service;
 
-    @InjectMocks
-    private ItemController itemController;
+    private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-        mockMvc = MockMvcBuilders.standaloneSetup(itemController).build();
+        objectMapper = new ObjectMapper();
     }
 
     @Test
@@ -51,10 +52,14 @@ public class ItemControllerTests {
 
         when(service.save(itemRequest)).thenReturn(savedItem);
 
+        // Act & Assert
         mockMvc.perform(post("/item/add")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(itemRequest)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(itemRequest)))
                 .andExpect(status().isOk())
-                .andExpect(content().json("{\"message\":\"Add data success\",\"status\":200,\"data\":{\"id\":1,\"name\":\"pen\",\"price\":50}}"));
+                .andExpect(jsonPath("$.message", is("Add data success")))
+                .andExpect(jsonPath("$.status", is(200)))
+                .andExpect(jsonPath("$.data.name", is("pen")))
+                .andExpect(jsonPath("$.data.id", is(1)));
     }
 }

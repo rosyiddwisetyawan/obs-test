@@ -37,7 +37,7 @@ public class OrderController {
             ApiResponse<Order> response = new ApiResponse<>("Add data success", 200, order);
             return ResponseEntity.ok(response);
         } else {
-            ApiResponse<Order> response = new ApiResponse<>("Add data failed", 400, null);
+            ApiResponse<Order> response = new ApiResponse<>("Add data failed, because insufficient stock", 400, null);
             return ResponseEntity.status(400).body(response);
         }
     }

@@ -36,6 +36,9 @@ public class InventoryService {
         if(arrType[0].equals("T")){
             inv.setQty(inv.getQty()+request.getQty());
         } else if (arrType[0].equals("W")) {
+            if(request.getQty()> inv.getQty()){
+                return null;
+            }
             inv.setQty(inv.getQty()-request.getQty());
         }
 
